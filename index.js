@@ -5,25 +5,32 @@ const express = require('express');
 const dotenv=require('dotenv');
 dotenv.config();
 const app = express();
-const port = 3001; 
+const cors = require('cors');
 
+const port = 3001; 
+app.use(cors());
 app.use(bodyParser.json());
 function formatResponse(responseText) {
-   
+  
+ 
     var paragraphs = responseText.split('\n');
   
-    var formattedResponse = paragraphs.join('<br><br>');
+    var formattedResponse = paragraphs.map(function(paragraph) {
+      return paragraph;
+    }).join('<br><br>');
   
     return formattedResponse;
   }
+
 // API endpoint
-app.post('/MercorSkillSync/openai', async (req, res) => {
-  const { problem, goals, target_audience,unique_features,prefrences,employee_type} = req.body;
+app.post('/openai', async (req, res) => {
+  const { age, gender, problem,days,mstatus,dislikes,mins,likes} = req.body;
 
 
-  const prompt = `I am planning to build a startup and it aims to solve the problem of ${problem}.The goal of my startup is ${goals} and my target audience is ${target_audience}, and it offers ${unique_features}. I have specific preferences for ${prefrences} technologies to be used, and I am looking for ${employee_type} employees to hire.Suggest me 4 names for my startup.
-  Create a suggestion plan for my startup which sjould be cost-effective and efficient. Create a detailed program how can i work to start and build my startup company and what technologies should I use. While hiring what skills should I look for in candidates.Avoid any superfluous pre and post-descriptive text. Don't break character under any circumstance.
-  
+  const prompt = `Take the following information about me and create a custom mental health plan. I am ${age} old and ${gender}. I need help with ${problem} that I’m suffering from the past ${days} days and ${mstatus} for this issue.
+  I absolutely don't like ${dislikes}.
+  I can spend ${mins} mins per day on the activities only & I enjoy ${likes}.
+  Create a 7-day routine for my mental health and happiness. Create a detailed program for my happiness. Create a detailed regimen for me to follow every day and mention the number of mins I need to spend on each activity. Keep a variety on each day for me to pick and choose. Mention at least 3 activities daily for me. Please exclude any activities that I specifically mention I don't like or have indicated a strong dislike towards. The activities should not be boring. Don't repeat the activity more than once in 1 week. Avoid any superfluous pre and post-descriptive text. Don't break character under any circumstance.
   `;
   console.log(prompt);
 
@@ -42,8 +49,7 @@ app.post('/MercorSkillSync/openai', async (req, res) => {
       }
     });
 
-    
-    //console.log({ response: response.data.choices[0].text });
+   
      
     res.json(formatResponse( response.data.choices[0].text ));
   } catch (error) {
